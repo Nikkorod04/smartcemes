@@ -1,0 +1,2 @@
+<img src="<?php echo e(asset('logo.png')); ?>" alt="LNU SmartCEMES Logo" <?php echo e($attributes); ?>>
+<?php /**PATH C:\Users\Nikko\Desktop\CAPSTONE\SmartCEMES_FINAL\resources\views/components/application-logo.blade.php ENDPATH**/ ?>

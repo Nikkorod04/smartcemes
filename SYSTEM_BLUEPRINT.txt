@@ -1,0 +1,1253 @@
+1. SYSTEM OVERVIEW
+System Name: LNU SmartCEMES
+Full Title: Monitoring & Evaluation + Decision Support System for LNU Community Extension
+Purpose:
+LNU SmartCEMES is a secure, web-based M&E platform tailored for LNU's CESO to track, analyze, and optimize community extension programs. It centralizes all monitoring data, automatically calculates M&E metrics, and provides real-time dashboards for data-driven decisions. Supports programs like literacy training, disaster preparedness, livelihood skills, and environmental sustainability in Leyte and surrounding areas.
+
+Core Principles:
+- Centralized Data: All program data (programs, activities, beneficiaries, forms) in one system
+- Real-time Analytics: Automatic M&E metric calculations from stored data
+- Decision Support: AI provides insights on performance, risks, and impacts
+- Human-Centered: AI augments, not replaces, human judgment—final decisions with CESO Admin
+- Compliance: CHED CMO No. 52 s. 2016 (Community Extension), RA 10173 (Data Privacy Act), SDGs
+- Scalable: Designed for future integrations (e.g., LNU's student portal or CHED reporting tools)
+
+System Scope: Monitoring & Evaluation + Decision Support for Extension Director
+- NOT a program implementation system
+- NOT for field staff coordination
+- FOCUS: Data collection, aggregation, analysis, and strategic decision-making
+
+Target Outcomes:
+- 50% faster decision-making through real-time dashboards
+- 100% data centralization (eliminate scattered spreadsheets/emails)
+- Automated M&E report generation (save 5+ hours per month)
+- Improved program efficiency and resource allocation
+- Enhanced reporting for accreditation (ISA Level III compliance)
+
+2. USER ROLES & ACCESS CONTROL
+
+System has EXACTLY TWO User Roles:
+
+2.1 ADMIN (Extension Director - CESO Office)
+Role: Strategic decision-maker and system administrator
+Responsibilities:
+  • Monitor program performance via M&E dashboard (24/7)
+  • View real-time KPIs and analytics
+  • Request and generate reports anytime
+  • Make strategic decisions based on data
+  • Manage user accounts (add/remove secretary)
+  • Review audit logs and system health
+  
+Access Permissions:
+  ✓ View M&E Dashboard (full access, real-time)
+  ✓ View Executive Reports & Analytics
+  ✓ View AI Insights & Recommendations
+  ✓ Generate/Export Reports (PDF/Excel)
+  ✓ View Audit Logs
+  ✓ User Management (create/delete accounts)
+  ✓ System Settings
+  ✗ Direct data entry (minimal)
+  ✗ Cannot delete critical data
+
+Read-heavy access focus; strategic oversight only
+
+2.2 SECRETARY (CES Office Support Staff)
+Role: Data entry operator and administrative support
+Responsibilities:
+  • Receive field reports from communities/partners
+  • Enter all program data into system (forms, activities, beneficiaries)
+  • Verify data accuracy before submission
+  • Submit monitoring & evaluation forms
+  • Support document management
+  • Communicate with field staff about data needs
+  
+Access Permissions:
+  ✓ Data Entry Portal (programs, activities, beneficiaries)
+  ✓ Create/Edit/View Programs
+  ✓ Create/Edit/View Activities
+  ✓ Create/Edit/View Beneficiaries
+  ✓ Submit Monitoring Forms
+  ✓ Submit Evaluation Forms
+  ✓ View Data Submission Confirmation
+  ✓ Download Forms/Lists (limited reporting)
+  ✗ View M&E Dashboard (view-only dashboard summary only)
+  ✗ View Executive Reports
+  ✗ View AI Insights
+  ✗ Export Reports
+  ✗ Generate Reports
+  ✗ User Management
+  ✗ Delete any records
+
+Write-heavy access focus; data entry only
+
+2.3 SECURITY REQUIREMENTS
+Role-Based Access Control (RBAC):
+  • Laravel middleware enforces role checks on every request
+  • Use Laravel Gates/Policies for fine-grained permissions
+  • Routes protected: Route::middleware(['auth', 'role:admin'])->group(...)
+  • No privilege escalation: Secretary cannot become Admin
+
+Authentication:
+  • Laravel Breeze with email/password
+  • Optional MFA via Laravel Fortify (2FA for admin account)
+  • Password requirements: Min 8 chars, uppercase, numbers, special chars
+  • Login rate limiting: 5 attempts per 15 minutes
+
+Session Management:
+  • Auto-logout after 1 hour of inactivity
+  • Max 2 concurrent sessions per user (prevents account sharing)
+  • Clear session on logout
+  • Session cookies: HttpOnly, Secure flags enabled
+
+Data Privacy & Security:
+  • Anonymize beneficiary data in export reports (use aggregates)
+  • Secretary cannot export raw beneficiary lists (only aggregated data)
+  • Admin can access detailed beneficiary data for analysis only
+  • All database queries logged for audit
+  • Encrypt sensitive uploads (programs, forms)
+  • Weekly database backups, encrypted storage
+
+Audit Logging:
+  • Log all data modifications: User, Action, Timestamp, Data Changed
+  • Log all report generations and exports
+  • Log all user login attempts (success/failure)
+  • 90-day audit trail retention
+  • Admin can view full audit logs anytime
+
+// Copilot Implementation Notes:
+// Gate::define('view-admin-dashboard', fn($user) => $user->role === 'admin');
+// Gate::define('enter-data', fn($user) => $user->role === 'secretary');
+// Middleware: Route::middleware(['auth', 'role:admin'])->group(...);
+// Use Laravel Policies for model-level authorization
+// Always authorize before showing data: $this->authorize('view', $program);  
+
+3. SYSTEM ARCHITECTURE & DATA FLOW
+
+3.1 CONTEXT DIAGRAM (System Overview)
+The system has 4 external entities interacting with SmartCEMES:
+
+External Entities:
+  1. SECRETARY
+     ← Receives field reports from communities/coordinators
+     → Enters data into system via Data Entry Portal
+     
+  2. COMMUNITIES & BENEFICIARIES
+     ← Program details, training materials
+     → Program feedback, outcomes, beneficiary information
+     
+  3. EXTENSION DIRECTOR (Admin User)
+     ← M&E Dashboard with real-time KPIs
+     → Request report exports
+     
+  4. REPORTING AGENCIES
+     ← Automated compliance reports
+     → Compliance requests, data requirements
+
+3.2 DATA FLOW ARCHITECTURE
+Data flows through 6 main stages:
+
+STAGE 1: DATA ENTRY (Secretary)
+  • Secretary collects field reports
+  • Enters programs, activities, beneficiaries, forms
+  • System validates all data in real-time
+
+STAGE 2: DATA STORAGE (Database)
+  • Validated data stored in 5 database tables:
+    - D1: Programs (titles, dates, status, community_id)
+    - D2: Activities (program_id, date, participants, location)
+    - D3: Beneficiaries (names, demographics, community_id)
+    - D4: Forms (monitoring, evaluation, compliance data)
+    - D5: Communities (names, locations, contact info)
+
+STAGE 3: DATA ANALYSIS (Analytics Engine)
+  • System automatically calculates M&E metrics from stored data
+  • Aggregates by program, community, time period
+  • 12-month trend analysis
+  • Risk detection & anomalies
+  • Performance scoring
+  • Results cached in D6: Metrics Cache
+
+STAGE 4: DATA PRESENTATION (Dashboard)
+  • M&E Dashboard displays real-time metrics to Admin
+  • KPI Cards (numbers, counts)
+  • Charts (doughnut, line, bar, pie graphs)
+  • Recent programs & community statistics
+  • Performance summaries & alerts
+  • Admin sees data instantly upon login
+
+STAGE 5: REPORT GENERATION (Reporting Engine)
+  • Admin requests report → System auto-generates
+  • Compiles data from all sources
+  • Creates formatted tables & charts
+  • Exports to PDF or Excel
+  • Sends to agencies or downloads
+
+STAGE 6: FEEDBACK LOOP (Continuous)
+  • Admin reviews dashboard → Identifies issues
+  • Admin provides feedback to Secretary
+  • Secretary corrects data → Dashboard updates automatically
+
+KEY PRINCIPLE: Secretary enters data ONCE → System handles all calculations, analysis, and reporting automatically
+
+3.3 PROCESS FLOW DIAGRAM (5 Main Processes)
+
+PROCESS 1.0: DATA ENTRY & VALIDATION
+  Sub-processes:
+    1.1 Receive Input (from secretary)
+    1.2 Format Check (date, number, text validation)
+    1.3 Duplicate Detection (prevent duplicates)
+    1.4 Required Field Check (all mandatory fields present)
+    1.5 Error Handling (flag errors or pass to storage)
+  
+  Output: Validated data ready for storage OR error notifications
+
+PROCESS 2.0: STORE DATA IN DATABASE
+  Sub-processes:
+    2.1 Validate Relationships (foreign keys exist)
+    2.2 Insert Program Records
+    2.3 Insert Activity Records
+    2.4 Insert Beneficiary Records
+    2.5 Insert Form Records
+    2.6 Create Audit Trail (log all actions)
+  
+  Output: Data persisted in D1-D5 with audit logs
+
+PROCESS 3.0: CALCULATE M&E METRICS
+  Sub-processes:
+    3.1 Aggregate Programs (total, active, completed counts)
+    3.2 Aggregate Beneficiaries (total reached, demographics)
+    3.3 Aggregate Activities (count, types, participants)
+    3.4 Analyze Trends (12-month comparison, growth rates)
+    3.5 Calculate Performance Indicators (efficiency, compliance)
+    3.6 Generate Ratings (alerts, risk scores, recommendations)
+  
+  Output: All metrics cached in D6 for instant dashboard access
+
+PROCESS 4.0: GENERATE DASHBOARD VIEW
+  Sub-processes:
+    4.1 Retrieve Metrics from Cache (D6)
+    4.2 Format KPI Cards (numbers with labels)
+    4.3 Prepare Chart Data (Chart.js format)
+    4.4 Generate Summary Tables (organized data)
+    4.5 Render Dashboard (HTML page for Admin)
+  
+  Output: Live M&E Dashboard with real-time data
+
+PROCESS 5.0: GENERATE REPORTS
+  Sub-processes:
+    5.1 Retrieve Report Data (from all sources D1-D6)
+    5.2 Format Data (tables, summaries, calculations)
+    5.3 Generate Charts (visual representations)
+    5.4 Compile Document (structure PDF/Excel)
+    5.5 Export to PDF/Excel (send to agencies)
+  
+  Output: Reports in PDF/Excel format
+
+3.4 KEY METRICS CALCULATED AUTOMATICALLY
+
+Dashboard KPIs (Updated in real-time):
+  • Total Programs (all time)
+  • Active Programs (status = active)
+  • Completed Programs (status = completed)
+  • Total Beneficiaries Reached
+  • Activities This Month
+  • Forms Submitted (M&E compliance)
+  • Program Status Distribution (pie chart)
+  • Activities Trend (12-month line chart)
+  • Top Communities (by beneficiary count)
+  • Beneficiary Demographics (gender, age breakdown)
+  
+Performance Alerts (Auto-generated):
+  • Programs with 0 activity this month
+  • Communities with declining beneficiary numbers
+  • Low form submission rates
+  • Performance trends
+  • Risk flags
+
+3.5 DATA STORAGE (DATABASE SCHEMA OVERVIEW)
+
+Tables:
+  • programs: id, title, description, status, start_date, end_date, community_id
+  • activities: id, program_id, date, location, activity_type, participants_count
+  • beneficiaries: id, first_name, middle_name, last_name, age, gender, community_id
+  • forms: id, form_type, program_id, submitted_by, submission_date, data (JSON)
+  • communities: id, name, location, description, contact_person
+  • metrics_cache: id, metric_name, metric_value, calculated_at, updated_at  
+
+4. CORE M&E MODULES
+
+System focuses on 4 main data management areas (aligned with M&E framework):
+
+⚠️ IMPORTANT: Form specifications and detailed data collection requirements are documented in a separate file.
+📄 REFERENCE: See CESO_FORMS.md for complete form specifications, field definitions, validation rules, and examples.
+
+4.1 PROGRAM MANAGEMENT MODULE
+Purpose: Create, track, and monitor extension programs
+Data Captured:
+  • Program title, description, objectives
+  • Start date, end date, status (active/planning/completed/paused)
+  • Community served
+  • Program type (training, workshop, seminar, etc.)
+  • Responsible person/coordinator
+  
+M&E Metrics Derived:
+  • Total programs by status
+  • Programs per community
+  • Program duration analysis
+  • Active program count trends
+  
+Secretary Responsibilities:
+  • Create program records with details
+  • Update program status
+  • Manage program schedules
+
+4.2 ACTIVITY TRACKING MODULE
+Purpose: Record and monitor all activities/events conducted
+Data Captured:
+  • Activity date, location, type
+  • Program linked to activity
+  • Participant count
+  • Materials used, topics covered
+  • Outcomes/outputs
+  
+M&E Metrics Derived:
+  • Total activities conducted
+  • Activities per program
+  • Monthly activity trends
+  • Average participants per activity
+  • Activity types breakdown
+  
+Secretary Responsibilities:
+  • Log all activities immediately after execution
+  • Record accurate participant numbers
+  • Update activity outcomes
+
+4.3 BENEFICIARY MANAGEMENT MODULE
+Purpose: Track individuals reached by programs
+Data Captured:
+  • Beneficiary name (first, middle, last)
+  • Demographics (age, gender)
+  • Community
+  • Program participated in
+  • Contact information
+  • Beneficiary status (active/inactive)
+  
+M&E Metrics Derived:
+  • Total beneficiaries reached
+  • Beneficiaries by community
+  • Demographics breakdown
+  • Repeat beneficiaries
+  • Beneficiary reach trends
+  
+Secretary Responsibilities:
+  • Register beneficiaries with complete information
+  • Link beneficiaries to programs
+  • Update beneficiary status
+
+4.4 MONITORING & EVALUATION FORMS MODULE
+Purpose: Submit periodic M&E reports and compliance forms
+Data Captured:
+  • Monitoring Forms (activities conducted, progress toward targets)
+  • Evaluation Forms (outcomes achieved, lessons learned)
+  • Compliance Forms (required reports for agencies)
+  • Feedback Forms (beneficiary satisfaction, testimonials)
+  
+M&E Metrics Derived:
+  • Form submission rate (compliance tracking)
+  • Forms submitted by month
+  • M&E compliance percentage
+  • Quality of reported outcomes
+  
+Secretary Responsibilities:
+  • Compile form responses from field
+  • Submit monitoring forms on schedule
+  • Submit evaluation forms per cycle
+  • Ensure form completeness
+
+Integration:
+  All modules feed data into Analytics Engine → Metrics Cache → Dashboard  
+
+5. DATA COLLECTION FORMS (CESO SPECIFICATIONS)
+
+All monitoring and evaluation forms are comprehensively documented in a separate forms specification document.
+
+📄 REFERENCE DOCUMENT: CESO_FORMS.md
+   Contains:
+   • Detailed form field definitions
+   • Required vs optional fields
+   • Data validation rules and formats
+   • Field value constraints
+   • Form submission schedules
+   • Form examples and samples
+   • Data entry instructions for secretary
+   • Form completion checklists
+
+IMPLEMENTATION NOTE:
+   When building data entry forms (Phase 3), refer to CESO_FORMS.md for exact field specifications.
+   Create Laravel form requests based on these specifications for server-side validation.
+
+
+6. KEY PERFORMANCE INDICATORS (KPIs)
+
+Dashboard KPI Targets (Recommended):
+  Input Level:
+    • Budget utilization (target: 90%)
+    • Staff involvement (target: all programs staffed)
+  
+  Process Level:
+    • Activity timeliness (target: 95% on-schedule)
+    • Form submission rate (target: 90% by deadline)
+    • Data quality (target: <2% errors)
+  
+  Output Level:
+    • Beneficiaries reached (target: 500+ per quarter)
+    • Community coverage (target: all 5+ communities served)
+    • Activity completion (target: 85%+ activities completed as planned)
+  
+  Outcome Level:
+    • Beneficiary satisfaction (target: 4/5 rating)
+    • Skill improvement rates (target: 75%+ show improvement)
+    • Program retention (target: 80% repeat beneficiaries)
+  
+  Impact Level:
+    • Community sustainability index (target: 80%+ programs self-sustaining after 2 years)
+    • Long-term behavior change (evidence-based)
+
+Aggregation Levels:
+  • By program (individual program KPIs)
+  • By community (aggregate of all programs in community)
+  • By fiscal year (annual summary)
+  • By program type (comparison across similar programs)
+  • System-wide (total across all programs & communities)
+
+Visualization:
+  • Dashboard cards for key metrics
+  • Charts for trends (12-month history)
+  • Tables for detailed breakdowns
+  • Alerts for targets not met
+
+// Copilot Implementation:
+// Use Laravel database queries with aggregation:
+// Program::where('status','active')->count();
+// Beneficiary::groupBy('community_id')->count();
+// Activity::whereBetween('date',[$start,$end])->sum('participants_count');
+7. REPORTING & FEEDBACK SYSTEM
+
+7.1 AUTOMATED REPORT TYPES
+
+Monthly M&E Report:
+  • Generated automatically on request
+  • Includes: KPIs, activity summary, beneficiary reach, form status
+  • Charts: Program status, activity trends, community performance
+  • Recipient: Extension Director, Reporting Agencies
+  • Format: PDF with professional formatting
+
+Quarterly Performance Report:
+  • Aggregates 3-month data
+  • Compares to quarterly targets
+  • Trend analysis (progress vs. previous quarter)
+  • Risk assessment and recommendations
+  • Format: PDF or Excel with interactive charts
+
+Annual Report (ISA Compliance):
+  • Full year summary of all programs
+  • Impact assessment data
+  • Community snapshots
+  • Performance ratings
+  • CHED-compliant format
+  • Format: Comprehensive PDF with appendices
+
+Custom Reports:
+  • Admin can request specific date ranges
+  • Filter by program, community, or type
+  • Choose metrics to include
+  • Export as PDF or Excel
+  • Generated within seconds
+
+7.2 AI-POWERED INSIGHTS (Optional - Phase 2)
+
+Automatic Summaries:
+  "Your system has 15 active programs reaching 2,450 beneficiaries across 5 communities. 
+   Activity levels stable at 28 this month. Community A shows 15% decline—recommend follow-up."
+
+Anomaly Alerts:
+  "Program X usually has 50 beneficiaries/month but only 12 this month. 
+   Possible issues: venue changed, scheduling conflict, or data entry error. Verify?"
+
+Performance Recommendations:
+  "Community B has highest engagement (95% attendance). Consider replicating their model 
+   in Community C (currently 60% engagement). Estimated impact: +150 beneficiaries."
+
+Trend Predictions:
+  "Based on 6-month trend, your beneficiary count will reach 3,200 by June 2026. 
+   Current trajectory: On track ✓"
+
+7.3 FEEDBACK LOOP
+
+Secretary Receives Corrections:
+  • Admin reviews dashboard
+  • Admin identifies data issues or asks questions
+  • Admin sends feedback to Secretary
+  • Secretary verifies and corrects data
+  • Dashboard updates automatically
+
+Continuous Improvement:
+  • Track data quality over time
+  • Identify recurring data entry errors
+  • Refine validation rules
+  • Update required fields as needed
+
+Secretary Dashboard Summary:
+  • View submitted data confirmation
+  • See data quality feedback
+  • Track form completion status
+  • Receive alerts on missing data
+
+
+8. AI DECISION SUPPORT ENGINE (Optional - Phase 2)
+
+8.1 THREE IMPLEMENTATION APPROACHES
+
+APPROACH 1: FREE & OPEN-SOURCE (Cost: $0)
+  Technology: Ollama (local LLM), NLTK (NLP), PHP-ML
+  Implementation: Run AI models on your own server
+  Pros: No recurring costs, data privacy, works offline
+  Cons: Slower responses, requires server setup
+  Best for: Long-term cost savings, sensitive data
+
+APPROACH 2: FREE TIER WITH PAID UPGRADE (Cost: $0-20/month)
+  Technology: OpenAI API (GPT-4), Google Gemini, Claude
+  Implementation: Cloud-hosted AI services
+  Pros: Very accurate, easy to implement, starts free
+  Cons: Minimal recurring cost, external API dependency
+  Best for: Capstone projects, professional features, fastest deployment
+  RECOMMENDED for this project
+
+APPROACH 3: HYBRID (Cost: $5-15/month)
+  Technology: Free local AI + Paid commercial AI for advanced
+  Implementation: Use free models for basic analysis, paid for complex
+  Pros: Best of both worlds, optimized cost
+  Cons: More complex implementation
+  Best for: Balanced approach with controlled costs
+
+8.2 OPTIONAL AI FEATURES (If OpenAI Approach Selected)
+
+AI Chatbot (Phase 2):
+  • Director can ask: "Show me underperforming programs"
+  • AI queries database and responds naturally
+  • Example: "I found 2 underperforming programs: Program A (70% below average)..."
+  • Cost: ~$1-5/month for frequent use
+
+Smart Summaries:
+  • Auto-generate dashboard insight text
+  • "Your system is performing well with..."
+  • Cost: ~$0.50/month
+
+Anomaly Detection:
+  • Flag unusual data patterns
+  • "Program X activity dropped 40%—check venue/date changes"
+  • Cost: ~$0.50/month
+
+Performance Forecasting:
+  • Predict beneficiary count next month
+  • "Current trend suggests 3,200 by June—on track to meet target"
+  • Cost: ~$1/month
+
+8.3 IMPLEMENTATION FOR PHASE 1 (NO AI YET)
+Phase 1 focuses on core functionality (data entry, dashboard, reporting).
+AI integration deferred to Phase 2 for optional enhancement.
+
+// Copilot Notes:
+// For Phase 2 with OpenAI:
+// composer require openai-php/client
+// Create: app/Services/AIConversationService.php
+// Methods: interpretQuestion($q), generateQuery(), formatResponse($data)
+// Integrate into Dashboard view as optional widget  
+9. UI/UX DESIGN GUIDELINES
+
+9.1 DESIGN SYSTEM
+
+Color Scheme (LNU-Inspired):
+  • Primary Blue: #0A1F8F (LNU primary)
+  • Secondary Gold: #FFD700 (accent)
+  • Dark Blue: #1E3BB3 (text, borders)
+  • Success Green: #10B981 (alerts, status)
+  • Warning Orange: #F59E0B (alerts)
+  • Error Red: #EF4444 (alerts)
+  • Neutral Gray: #F3F4F6 (backgrounds)
+
+Typography:
+  • Font Family: Inter, Roboto (sans-serif)
+  • Headings: Bold, 24-32px
+  • Body Text: Regular, 14-16px
+  • Labels: Medium, 12-14px
+
+9.2 LAYOUT STRUCTURE
+
+Master Layout (app.blade.php):
+  • Top navbar: Logo, branding, user profile (sticky)
+  • Sidebar navigation: Collapsible on mobile
+  • Main content area: Full width, responsive
+  • Footer: Copyright, version info
+
+Admin Dashboard Layout:
+  • Header section with welcome message
+  • 4 KPI cards (total programs, beneficiaries, activities, forms)
+  • 4 charts in grid (program status, activities trend, communities, forms)
+  • Recent programs & community statistics table
+  • AI insights widget (Phase 2 placeholder)
+
+Secretary Dashboard Layout:
+  • Task list: Forms to submit, data entries pending
+  • Quick action buttons: Create program, log activity, register beneficiary
+  • Recent submissions: Confirmation of entered data
+  • Data quality feedback: Issues to correct
+  • Navigation to data entry forms
+
+9.3 KEY COMPONENTS
+
+KPI Cards:
+  • Icon + large number + label
+  • Color-coded gradient background
+  • Hover effect: Scale up, shadow increase
+  • Animation: Number counts up from 0 to current value
+
+Charts:
+  • Chart.js implementation
+  • Responsive (resize with container)
+  • Legend below chart
+  • Tooltip on hover
+  • Types: Doughnut, Line, Bar, Pie
+
+Buttons:
+  • Primary: Blue background, white text
+  • Secondary: Outlined style
+  • Danger: Red background (delete actions)
+  • States: Normal, Hover, Disabled, Loading
+
+Forms:
+  • Clean layout with clear labels
+  • Validation messages inline
+  • Required field indicators (*)
+  • Submit button at bottom
+  • Client-side validation (placeholder, type, required)
+
+Tables:
+  • Sortable columns (click header)
+  • Pagination (10-50 rows per page)
+  • Row actions: View, Edit, Delete (icons)
+  • Alternating row colors for readability
+
+Alerts/Notifications:
+  • Inline alerts (validation errors)
+  • Toast notifications (success/error messages)
+  • Modal dialogs (confirmations, important actions)
+  • Auto-collapse after 5 seconds
+
+9.4 RESPONSIVENESS
+
+Desktop (>1024px):
+  • Full sidebar navigation
+  • Multi-column layouts
+  • All features visible
+
+Tablet (768-1024px):
+  • Sidebar collapses to icon-only
+  • 2-column layouts
+  • Touch-friendly buttons
+
+Mobile (<768px):
+  • Hamburger menu for navigation
+  • Single column layouts
+  • Larger touch targets (44x44px minimum)
+  • Optimized for thumb scrolling
+
+9.5 ACCESSIBILITY
+
+ARIA Labels:
+  • Icons have descriptive labels (e.g., aria-label="View program")
+  • Form fields linked to labels
+  • Alert messages announced to screen readers
+
+Keyboard Navigation:
+  • Tab through all interactive elements
+  • Enter/Space to activate buttons
+  • Escape to close modals
+  • Focus visible (outline style)
+
+Color Contrast:
+  • Text: Minimum 4.5:1 ratio
+  • Large text (24px+): Minimum 3:1 ratio
+  • Icons: Not color-only (include text or pattern)
+
+Focus Management:
+  • Focus visible on all buttons, links, form inputs
+  • Focus trapped in modals
+  • Focus returns after modal close
+10. SECURITY, ETHICS & DATA PRIVACY
+
+10.1 DATA PROTECTION MEASURES
+
+Encryption:
+  • HTTPS/TLS for all data in transit (enforced)
+  • Database passwords encrypted (bcrypt hashing)
+  • Sensitive uploads encrypted at rest
+  • API keys stored in .env (never in code)
+
+Access Control:
+  • RBAC enforced at database level
+  • Policy-based authorization (Laravel Policies)
+  • No SQL injection vulnerabilities (use parameterized queries)
+  • Rate limiting on API endpoints
+
+Audit Logging:
+  • ALL data changes logged: User, Action, Timestamp, Old/New values
+  • Login attempts tracked (success/failure)
+  • Report exports logged with recipient info
+  • Audit logs retained for 90 days minimum
+  • Admin can view audit trail anytime
+
+Data Privacy Compliance:
+  • RA 10173 (Data Privacy Act) compliance
+  • Beneficiary data anonymized in exports (use aggregate only)
+  • Secretary cannot export raw beneficiary lists
+  • Admin accesses detailed data for analysis only, never exported
+  • Data retention policy: Keep 2 years, then archive
+  • Right to deletion: Beneficiaries can request data removal
+
+Backup & Recovery:
+  • Daily automated database backups
+  • Encrypted backup storage
+  • Tested restore procedures (monthly)
+  • Recovery Time Objective (RTO): < 4 hours
+  • Recovery Point Objective (RPO): < 1 day
+
+10.2 ETHICAL AI PRINCIPLES (Phase 2)
+
+Explainability:
+  • Every AI recommendation includes explanation
+  • Example: "Program X has 40% fewer activities due to X reason. Recommended action: Y"
+  • Show data sources and logic used
+
+Bias Prevention:
+  • Monitor for regional disparities (e.g., urban vs. rural bias)
+  • Check for demographic biases in recommendations
+  • Regular audit of AI output fairness
+  • Manual oversight of anomalies
+
+Transparency:
+  • Inform users when AI is being used
+  • Show confidence levels in predictions
+  • Disclose AI limitations
+  • Human approval required before critical actions
+
+10.3 INCIDENT RESPONSE
+
+Security Incident Plan:
+  • Breach detection: Daily log monitoring
+  • Response: Immediate quarantine of affected accounts
+  • Notification: Users notified within 24 hours
+  • Resolution: Fix vulnerability, update security
+  • Documentation: Post-incident review
+
+Performance Incident Plan:
+  • Monitor dashboard response times
+  • Alert if > 2 seconds
+  • Auto-scale if database queries slow
+  • Optimize slow queries monthly
+  • Maintain 99% uptime target
+11. TECHNOLOGY STACK
+
+Backend:
+  • PHP 8.2+ (modern, performant)
+  • Laravel 12 (full-stack framework)
+  • Laravel Breeze (authentication scaffolding)
+
+Database:
+  • MySQL 8.0+ (relational, scalable)
+  • Laravel Eloquent ORM (data models)
+  • Database migrations (version control for schema)
+
+Frontend:
+  • Blade templating (Laravel's template engine)
+  • Tailwind CSS (utility-first styling)
+  • Alpine.js (lightweight interactivity)
+  • Chart.js 4.4 (data visualization)
+  • Livewire 4 (real-time components, optional)
+
+Authentication & Authorization:
+  • Laravel Breeze (email/password auth)
+  • Laravel Fortify (optional MFA)
+  • Laravel Gates & Policies (RBAC)
+
+Additional Packages:
+  • Composer packages:
+    - barryvdh/laravel-dompdf (PDF generation)
+    - maatwebsite/excel (Excel export)
+    - laravel/telescope (debugging in dev)
+  • NPM packages:
+    - tailwindcss, autoprefixer (CSS)
+    - chart.js (charting)
+
+Hosting:
+  • Linux server (Ubuntu 22.04)
+  • PHP 8.2 with FastCGI
+  • MySQL 8.0
+  • Nginx or Apache web server
+  • SSL certificate (Let's Encrypt free)
+
+Development Tools:
+  • VS Code (editor)
+  • GitHub Copilot (code assistance)
+  • Git (version control)
+  • PHPUnit (unit testing)
+  • Laravel Sail (Docker development environment, optional)
+
+Optional (Phase 2):
+  • OpenAI PHP SDK (AI integration for chatbot)
+  • Ollama (local LLM if using free approach)
+  • Laravel Horizon (queued job monitoring, if async processing needed)
+12. PHASED DEVELOPMENT ROADMAP
+
+PHASE 0: PROJECT SETUP (Week 1-2)
+Objectives:
+  ✓ Set up Laravel 12 project with Breeze
+  ✓ Configure database (MySQL)
+  ✓ Test local server
+  ✓ Version control setup (Git)
+
+Deliverables:
+  • Working Laravel + Breeze installation
+  • Database configured and tested
+  • Authentication working (login/register)
+  • User roles infrastructure ready
+
+Copilot Usage:
+  • Generate Laravel migrations for users table
+  • Create middleware for role checking
+  • Generate git hooks for consistency
+
+PHASE 1: CORE INFRASTRUCTURE (Week 3-5)
+Objectives:
+  ✓ Implement Admin & Secretary user roles
+  ✓ Create master layout with navigation
+  ✓ Build Admin M&E Dashboard (skeleton)
+  ✓ Build Secretary Data Entry Portal (skeleton)
+  ✓ Implement RBAC/Gates/Policies
+
+Deliverables:
+  • Admin dashboard with layout (no data yet)
+  • Secretary portal with layout (no data entry yet)
+  • Role-based route protection working
+  • Navigation conditional on user role
+  • Login flow works for both roles
+
+Copilot Usage:
+  • Generate Blade views for dashboards
+  • Create Tailwind components (cards, buttons, nav)
+  • Generate Gates/Policies for authorization
+
+PHASE 2: DATA MODELS & STORAGE (Week 6-8)
+Objectives:
+  ✓ Create database models: Program, Activity, Beneficiary, Community, Form
+  ✓ Create database migrations
+  ✓ Create Laravel models with relationships
+  ✓ Implement model validation
+
+Deliverables:
+  • Database schema complete
+  • All models created with relationships
+  • Database seeder with test data
+  • Migrations tested
+
+Copilot Usage:
+  • Generate migrations for all tables
+  • Generate Eloquent models with relationships
+  • Generate model factories for testing
+
+PHASE 3: DATA ENTRY FORMS (Week 9-11)
+Objectives:
+  ✓ Create Program CRUD forms (Secretary)
+  ✓ Create Activity CRUD forms (Secretary)
+  ✓ Create Beneficiary CRUD forms (Secretary)
+  ✓ Create Monitoring/Evaluation forms (Secretary)
+  ✓ Implement client-side validation
+
+Deliverables:
+  • All CRUD operations working
+  • Validation on both client & server
+  • Professional form UI with Tailwind
+  • Success/error feedback messages
+
+Copilot Usage:
+  • Generate controller methods for CRUD
+  • Generate form views with validation
+  • Generate request classes for validation
+
+PHASE 4: DASHBOARD & METRICS (Week 12-14)
+Objectives:
+  ✓ Calculate M&E metrics from stored data
+  ✓ Create metrics cache/update system
+  ✓ Build dashboard KPI cards
+  ✓ Implement charts (Chart.js)
+  ✓ Add real-time dashboard updates
+
+Deliverables:
+  • Admin dashboard shows all KPIs live
+  • Charts visualize data correctly
+  • Metrics update when data changes
+  • Dashboard responsive and fast
+
+Copilot Usage:
+  • Generate metric calculation queries
+  • Generate Chart.js implementations
+  • Generate dashboard controller methods
+
+PHASE 5: REPORTING & EXPORTS (Week 15-16)
+Objectives:
+  ✓ Generate PDF reports (DomPDF)
+  ✓ Generate Excel exports (Laravel Excel)
+  ✓ Create report templates
+  ✓ Implement scheduled report generation
+
+Deliverables:
+  • PDF reports generated successfully
+  • Excel exports with charts
+  • Reports sent to agencies automatically
+  • Report logs tracked in database
+
+Copilot Usage:
+  • Generate PDF generation code
+  • Generate Excel export functionality
+  • Generate report template views
+
+PHASE 6: SECURITY & TESTING (Week 17-18)
+Objectives:
+  ✓ Implement authentication security (MFA)
+  ✓ Add rate limiting
+  ✓ Audit logging system
+  ✓ Unit & integration tests
+  ✓ Security audit & fixes
+
+Deliverables:
+  • All tests passing (>80% coverage)
+  • MFA optional for Admin
+  • Rate limiting on login attempts
+  • Audit logs recording all actions
+
+Copilot Usage:
+  • Generate PHPUnit test cases
+  • Generate security middleware
+  • Generate audit logging service
+
+PHASE 7: POLISH & DOCUMENTATION (Week 19-20)
+Objectives:
+  ✓ UI/UX refinements
+  ✓ Performance optimization
+  ✓ User documentation
+  ✓ Developer documentation
+  ✓ Capstone presentation prep
+
+Deliverables:
+  • Professional UI (animations, transitions)
+  • Fast load times (<2s for dashboard)
+  • User guide for Admin and Secretary
+  • System documentation for deployment
+  • Demo video/presentation ready
+
+PHASE 8 (Optional/Future): AI INTEGRATION
+Timeline: After capstone submission (if time/budget permits)
+Objectives:
+  • Integrate OpenAI API
+  • Build AI chatbot for data querying
+  • Auto-generate summaries and recommendations
+  • Smart anomaly detection
+
+Copilot Usage:
+  • Generate OpenAI API integration
+  • Generate chatbot Livewire component
+  • Generate AI service methods
+
+
+13. DEVELOPMENT BEST PRACTICES & COPILOT GUIDANCE
+
+13.1 CODE QUALITY STANDARDS
+
+Structure:
+  • Follow Laravel conventions (models, controllers, views)
+  • One responsibility per class/method (Single Responsibility Principle)
+  • Use dependency injection for all services
+  • Keep methods short (<30 lines ideally)
+  • Clear naming: $admin_dashboard not $ad
+
+Naming Conventions:
+  • Models: Singular (User, Program, Activity)
+  • Controllers: Plural + Controller (UsersController, ProgramsController)
+  • Methods: Camel case (getUserDashboard, calculateMetrics)
+  • Variables: Snake case ($user_data, $active_programs)
+  • Constants: ALL_CAPS (ROLE_ADMIN, MAX_RETRIES)
+
+Comments:
+  • Reference blueprint sections in complex code
+  • Example: "// Blueprint 3.3: Aggregate Activities"
+  • Explain WHY, not WHAT (code shows what)
+  • Keep comments updated when code changes
+
+Testing:
+  • Write tests as you code (TDD approach)
+  • Run: php artisan test
+  • Target 80%+ code coverage
+  • Test both happy path and error cases
+  • Test authorization (role-based access)
+
+Version Control:
+  • Commit frequently (every feature/fix)
+  • Clear commit messages: "Add admin KPI dashboard" not "fix stuff"
+  • Branch naming: feature/admin-dashboard, bugfix/login-issue
+  • Pull requests before main branch merges
+
+13.2 COPILOT USAGE FOR DEVELOPMENT
+
+Effective Prompting:
+  √ Start with blueprint reference: "Blueprint 4.1: Program Management Module"
+  √ Be specific about technology: "Laravel 12, Blade template, Tailwind CSS"
+  √ Include current context: "We have User model with role column"
+  √ Ask for explanations: "Generate X and explain what it does"
+  √ Request tests: "Also generate PHPUnit tests for this function"
+
+AVOID:
+  ✗ Vague prompts: "Generate program stuff"
+  ✗ Asking for entire modules at once
+  ✗ Assuming outdated info (always verify)
+  ✗ Using generated code without review
+
+Workflow:
+  1. Plan what you'll build (reference blueprint)
+  2. Ask Copilot to generate small pieces
+  3. Review generated code
+  4. Integrate into project
+  5. Test thoroughly
+  6. Move to next piece
+
+Example Copilot Prompts:
+
+For Models:
+  "Create a Laravel Eloquent model for Program following Blueprint 4.1.
+   Relationships: has many Activities, belongs to Community.
+   Attributes: title, status, start_date, end_date.
+   Include created_at, updated_at timestamps."
+
+For Controllers:
+  "Create AdminDashboardController for Blueprint 4.0.
+   Method: calculateMetrics() that queries all programs, activities, beneficiaries.
+   Returns array with total_programs, active_programs, total_beneficiaries.
+   Use Eloquent aggregation."
+
+For Views:
+  "Create admin dashboard view with Blueprint 8.3 components.
+   Use Tailwind CSS, LNU colors (#0A1F8F primary).
+   Include 4 KPI cards in grid layout with icons.
+   Add placeholder chart containers."
+
+For Tests:
+  "Write PHPUnit test for Program model validation.
+   Test: program can't be created without title.
+   Test: status must be one of: active, planning, completed, paused.
+   Test: relationship with Community works."
+
+For Authorization:
+  "Create Laravel Gate for 'add-secretary' permission.
+   Only users with role=admin can add secretaries.
+  Use in controller: $this->authorize('add-secretary');"
+
+13.3 DEBUGGING WITH COPILOT
+
+Problem Solving:
+  1. Get complete error message
+  2. Share with Copilot:
+     "I'm getting error: '...error message...' in dashboard.blade.php line 42.
+      Blueprint section: 4.2 M&E Dashboard.
+      I tried: ... already. What else could cause this?"
+  3. Copilot suggests solutions
+  4. Try one, test, move on
+
+Common Issues & Solutions:
+  • "Undefined variable in view" → Pass from controller with compact()
+  • "403 Unauthorized" → Check Gates/Policies authorization
+  • "Query returns null" → Verify relationship exists, use ->with() eager loading
+  • "Validation fails silently" → Check request class, add dd() for debugging
+
+13.4 PERFORMANCE OPTIMIZATION
+
+Database:
+  • Use eager loading: Program::with('activities')->get()
+  • Index frequently queried columns (status, community_id)
+  • Use database views for complex aggregations
+  • Denormalize metrics into cache table (D6)
+
+Caching:
+  • Cache dashboard queries (5-minute TTL)
+  • Invalidate on data changes
+  • Use Redis for distributed caching (optional)
+
+Frontend:
+  • Minify CSS/JS (npm run production)
+  • Lazy load charts (only render when visible)
+  • Debounce search/filter inputs (500ms)
+  • Use CDN for static assets
+
+Monitoring:
+  • Use Laravel Telescope in dev (php artisan telescope:install)
+  • Monitor slow queries (>1sec)
+  • Profile dashboard load time
+
+13.5 DEPLOYMENT CHECKLIST
+
+Before Going Live:
+  ☐ All tests passing (php artisan test)
+  ☐ No debug output in production (.env: APP_DEBUG=false)
+  ☐ Database backed up
+  ☐ HTTPS/SSL enabled
+  ☐ Rate limiting configured
+  ☐ Audit logging working
+  ☐ MFA enabled for admin account
+  ☐ Database migrations tested
+  ☐ Environment variables set (.env)
+  ☐ File permissions correct (storage/ writable)
+  ☐ Cron jobs scheduled (if using Horizon)
+  ☐ Error logging configured
+  ☐ Backup process tested
+  ☐ User documentation ready
+
+Deployment Steps:
+  1. Pull code from git
+  2. composer install --no-dev
+  3. npm run production
+  4. php artisan config:cache
+  5. php artisan migrate --force
+  6. php artisan optimize
+  7. Verify system works
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                        PROJECT QUICK REFERENCE
+═══════════════════════════════════════════════════════════════════════════════
+
+PROJECT NAME:          LNU SmartCEMES
+FULL NAME:             Monitoring & Evaluation + Decision Support System for LNU Community Extension
+VERSION:               1.0 (Capstone Release)
+STATUS:                In Development (Follow Phases 0-7 roadmap)
+
+KEY FEATURES:
+  → Real-time M&E Dashboard for Extension Director
+  → Centralized data collection from communities
+  → Automated KPI calculations
+  → Professional report generation (PDF/Excel)
+  → Role-based access (Admin + Secretary)
+  → Audit logging and security
+  → Optional AI chatbot (Phase 2)
+
+USERS:
+  Role 1: ADMIN (Extension Director)
+    Access: Dashboard, Reports, Analytics, User Management
+    No data entry (read-heavy)
+  
+  Role 2: SECRETARY (CES Office Staff)
+    Access: Data Entry Forms, Monitoring Forms
+    Write-heavy; limited reporting
+
+TECHNOLOGY:
+  Backend:    Laravel 12, PHP 8.2+
+  Frontend:   Blade, Tailwind CSS, Chart.js
+  Database:   MySQL 8.0+
+  Auth:       Laravel Breeze
+  RBAC:       Laravel Gates & Policies
+
+DATA FLOW SUMMARY:
+  Secretary enters data → System validates
+  → Data stored in database
+  → Analytics engine calculates metrics
+  → Metrics cached for instant dashboard access
+  → Admin views real-time M&E Dashboard
+  → Admin generates reports from metrics
+  → Reports sent to agencies automatically
+
+DATABASE TABLES (5 main + 1 cache):
+  D1: programs (id, title, status, start_date, community_id, ...)
+  D2: activities (id, program_id, date, participants_count, ...)
+  D3: beneficiaries (id, first_name, last_name, community_id, ...)
+  D4: forms (id, form_type, program_id, data, ...)
+  D5: communities (id, name, location, ...)
+  D6: metrics_cache (pre-calculated KPIs)
+
+MAIN PROCESSES (See Section 3.3):
+  1.0 Data Entry & Validation (5 sub-processes)
+  2.0 Store Data in Database (6 sub-processes)
+  3.0 Calculate M&E Metrics (6 sub-processes)
+  4.0 Generate Dashboard View (5 sub-processes)
+  5.0 Generate Reports (5 sub-processes)
+
+DASHBOARD KPIs (Calculated Automatically):
+  • Total Programs, Active Programs, Completed Programs
+  • Total Beneficiaries, Beneficiaries by Community
+  • Activities This Month, Activities Trend (12-month)
+  • Forms Submitted, Form Completion Rate
+  • Program Status Distribution (chart)
+  • Top Communities (by beneficiary count)
+
+DEVELOPMENT TIMELINE:
+  Phase 0: Project Setup (Week 1-2)
+  Phase 1: Core Infrastructure (Week 3-5)
+  Phase 2: Data Models & Storage (Week 6-8)
+  Phase 3: Data Entry Forms (Week 9-11)
+  Phase 4: Dashboard & Metrics (Week 12-14)
+  Phase 5: Reporting & Exports (Week 15-16)
+  Phase 6: Security & Testing (Week 17-18)
+  Phase 7: Polish & Documentation (Week 19-20)
+  Phase 8: AI Integration (Optional, Post-Capstone)
+
+SECURITY FEATURES:
+  • HTTPS/TLS encryption for data in transit
+  • Database password hashing (bcrypt)
+  • Role-Based Access Control (RBAC)
+  • Session management (auto-logout 1 hour)
+  • Audit logging (all data changes tracked)
+  • MFA support for Admin account
+  • Rate limiting on login attempts
+  • Data privacy compliance (RA 10173)
+
+COLOR SCHEME (Tailwind):
+  Primary:    #0A1F8F (LNU Navy Blue)
+  Secondary:  #FFD700 (Gold)
+  Dark:       #1E3BB3
+  Success:    #10B981 (Green)
+  Warning:    #F59E0B (Orange)
+  Error:      #EF4444 (Red)
+
+STARTING POINT:
+  1. Follow Phase 0: Project Setup (Laravel 12 + Breeze)
+  2. Implement Phase 1: Core Infrastructure (dashboards + roles)
+  3. Follow roadmap sequentially
+  4. Use Copilot for code generation
+  5. Test after each phase
+  6. Reference blueprint sections when building features
+
+KEY CONTACT POINTS IN BLUEPRINT:
+  • User Roles: Section 2.1 (Admin), 2.2 (Secretary)
+  • System Architecture: Section 3 (DFDs, data flow)
+  • Modules: Section 4 (Programs, Activities, Beneficiaries, Forms)
+  • Data Collection Forms: Section 5 (REFERENCE to CESO_FORMS.md)
+  • KPIs: Section 6
+  • Reporting: Section 7
+  • AI Integration: Section 8
+  • UI/UX: Section 9
+  • Security: Section 10
+  • Technology: Section 11
+  • Roadmap: Section 12
+  • Copilot Tips: Section 13
+
+═══════════════════════════════════════════════════════════════════════════════
+                  END OF LNU SmartCEMES SYSTEM BLUEPRINT v1.0
+                        Last Updated: March 2026
+                        Status: Ready for Development
+═══════════════════════════════════════════════════════════════════════════════

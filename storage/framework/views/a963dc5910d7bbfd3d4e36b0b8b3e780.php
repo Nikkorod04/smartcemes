@@ -1,0 +1,442 @@
+<div class="space-y-4">
+    <!-- Filters & Search -->
+    <div class="bg-gray-50 border-b border-gray-200 px-6 py-4 space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <input 
+                    type="text"
+                    wire:model.live="searchTerm"
+                    placeholder="Search activities..."
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-transparent"
+                />
+            </div>
+            <div>
+                <select 
+                    wire:model.live="filterStatus"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-transparent"
+                >
+                    <option value="">All Status</option>
+                    <option value="planned">Planned</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+            </div>
+            <div>
+                <button 
+                    wire:click="openActivityForm"
+                    class="w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold py-2 px-4 rounded-lg transition"
+                >
+                    + New Activity
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!empty($notification)): ?>
+        <div class="mx-6 mt-4 px-4 py-3 bg-<?php echo e($notificationType); ?>-100 text-<?php echo e($notificationType); ?>-800 rounded-lg flex items-center justify-between">
+            <span><?php echo e($notification); ?></span>
+            <button wire:click="$set('notification', '')" class="text-<?php echo e($notificationType); ?>-600 hover:text-<?php echo e($notificationType); ?>-800">✕</button>
+        </div>
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+    <!-- Activities List -->
+    <div class="px-6 py-4 space-y-3">
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $activities; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $activity): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoop($loop->index); ?><?php endif; ?>
+            <div class="bg-gray-50 rounded-lg border border-gray-200 p-4 hover:shadow-md transition">
+                <div class="flex items-start justify-between gap-4">
+                    <div class="flex-1">
+                        <!-- Activity Header -->
+                        <div class="flex items-center gap-3 mb-2">
+                            <h3 class="text-base font-bold text-gray-900"><?php echo e($activity->activity_name); ?></h3>
+                            <span class="inline-block px-3 py-1 rounded-full text-xs font-medium <?php echo e($activity->status === 'completed' ? 'bg-green-100 text-green-800' :
+                                ($activity->status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+                                ($activity->status === 'planned' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-gray-100 text-gray-800'))); ?>">
+                                <?php echo e(ucfirst(str_replace('_', ' ', $activity->status))); ?>
+
+                            </span>
+                        </div>
+
+                        <!-- Activity Details -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-gray-600 mb-2">
+                            <div>
+                                <p class="font-medium"><?php echo e($activity->activity_date->format('M d, Y')); ?></p>
+                                <p class="text-gray-500"><?php echo e($activity->start_time); ?> - <?php echo e($activity->end_time); ?></p>
+                            </div>
+                            <div>
+                                <p class="font-medium"><?php echo e($activity->location ?? 'N/A'); ?></p>
+                                <p class="text-gray-500">Location</p>
+                            </div>
+                            <div>
+                                <p class="font-medium"><?php echo e($activity->target_attendees); ?></p>
+                                <p class="text-gray-500">Target</p>
+                            </div>
+                            <div>
+                                <p class="font-medium"><?php echo e($activity->facilitatorRecords()->count()); ?> Facilitators</p>
+                            </div>
+                        </div>
+
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($activity->description): ?>
+                            <p class="text-xs text-gray-600 line-clamp-2"><?php echo e($activity->description); ?></p>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex flex-col gap-1">
+                        <button 
+                            wire:click="editActivity(<?php echo e($activity->id); ?>)"
+                            class="bg-blue-100 text-blue-800 hover:bg-blue-200 px-2 py-1 rounded text-xs font-medium transition whitespace-nowrap"
+                        >
+                            Edit
+                        </button>
+                        <button 
+                            wire:click="openAttendanceModal(<?php echo e($activity->id); ?>)"
+                            class="bg-green-100 text-green-800 hover:bg-green-200 px-2 py-1 rounded text-xs font-medium transition whitespace-nowrap"
+                        >
+                            Log
+                        </button>
+                        <button 
+                            wire:click="deleteActivity(<?php echo e($activity->id); ?>)"
+                            onclick="return confirm('Delete this activity?')"
+                            class="bg-red-100 text-red-800 hover:bg-red-200 px-2 py-1 rounded text-xs font-medium transition whitespace-nowrap"
+                        >
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+            <div class="text-center py-8">
+                <p class="text-gray-500">No activities found. Create one to get started!</p>
+            </div>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+        <!-- Pagination -->
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($activities->hasPages()): ?>
+            <div class="mt-4">
+                <?php echo e($activities->links()); ?>
+
+            </div>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+    </div>
+
+    <!-- ADD/EDIT ACTIVITY MODAL -->
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($showActivityForm): ?>
+        <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <!-- Modal Header -->
+                <div class="bg-gradient-to-r from-blue-900 to-blue-800 text-white px-6 py-5 flex justify-between items-center border-b-4 border-yellow-400">
+                    <h2 class="text-2xl font-bold">
+                        <?php echo e($editingActivityId ? 'Edit Activity' : 'New Activity'); ?>
+
+                    </h2>
+                    <button 
+                        wire:click="$set('showActivityForm', false)"
+                        class="text-white hover:text-gray-200 text-2xl font-bold transition"
+                    >
+                        ✕
+                    </button>
+                </div>
+
+                <!-- Form Content -->
+                <form wire:submit.prevent="saveActivity" class="p-6 space-y-4">
+                    <!-- Activity Name -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Activity Name *</label>
+                        <input 
+                            type="text"
+                            wire:model="activity_name"
+                            placeholder="e.g., Farmer Training Workshop"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-transparent"
+                        />
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['activity_name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <span class="text-red-500 text-sm"><?php echo e($message); ?></span> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    </div>
+
+                    <!-- Date & Time -->
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Date *</label>
+                            <input 
+                                type="date"
+                                wire:model="activity_date"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-transparent"
+                            />
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['activity_date'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <span class="text-red-500 text-sm"><?php echo e($message); ?></span> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Start Time *</label>
+                            <input 
+                                type="time"
+                                wire:model="start_time"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-transparent"
+                            />
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['start_time'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <span class="text-red-500 text-sm"><?php echo e($message); ?></span> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">End Time *</label>
+                            <input 
+                                type="time"
+                                wire:model="end_time"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-transparent"
+                            />
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['end_time'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <span class="text-red-500 text-sm"><?php echo e($message); ?></span> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                        </div>
+                    </div>
+
+                    <!-- Location & Target -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                            <input 
+                                type="text"
+                                wire:model="location"
+                                placeholder="e.g., Barangay Hall"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Target Attendees</label>
+                            <input 
+                                type="number"
+                                wire:model="target_attendees"
+                                min="0"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Activity Status *</label>
+                        <div class="flex gap-2">
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = ['planned' => 'Planned', 'in_progress' => 'In Progress', 'completed' => 'Completed', 'cancelled' => 'Cancelled']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $val => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoop($loop->index); ?><?php endif; ?>
+                                <button 
+                                    type="button"
+                                    wire:click="$set('status', '<?php echo e($val); ?>')"
+                                    class="flex-1 py-2 px-3 rounded-lg font-semibold transition duration-200 border-2 <?php echo e($status === $val ? 'bg-green-600 text-white border-green-700' : 'bg-gray-50 text-gray-800 border-gray-300 hover:bg-gray-100'); ?>"
+                                >
+                                    <?php echo e($label); ?>
+
+                                </button>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                        </div>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['status'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <span class="text-red-500 text-sm"><?php echo e($message); ?></span> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    </div>
+
+                    <!-- Description -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                        <textarea 
+                            wire:model="description"
+                            rows="2"
+                            placeholder="Activity details..."
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-transparent"
+                        ></textarea>
+                    </div>
+
+                    <!-- Facilitators -->
+                    <div class="border-t pt-4">
+                        <h4 class="font-semibold text-gray-900 mb-3">Facilitators</h4>
+                        <div class="flex gap-2 mb-3">
+                            <input 
+                                type="text"
+                                wire:model="new_facilitator_name"
+                                placeholder="Facilitator name"
+                                class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm"
+                            />
+                            <select 
+                                wire:model="new_facilitator_role"
+                                class="px-4 py-2 border border-gray-300 rounded-lg text-sm"
+                            >
+                                <option value="instructor">Instructor</option>
+                                <option value="assistant">Assistant</option>
+                                <option value="coordinator">Coordinator</option>
+                            </select>
+                            <button 
+                                type="button"
+                                wire:click="addFacilitator"
+                                class="bg-blue-900 hover:bg-blue-800 text-white px-4 py-2 rounded-lg font-medium text-sm"
+                            >
+                                Add
+                            </button>
+                        </div>
+
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!empty($facilitators)): ?>
+                            <div class="space-y-2">
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $facilitators; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $facilitator): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoop($loop->index); ?><?php endif; ?>
+                                    <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                                        <span class="text-sm text-gray-800">
+                                            <?php echo e($facilitator['facilitator_name']); ?> 
+                                            <span class="text-xs text-gray-500">(<?php echo e(ucfirst($facilitator['facilitator_role'])); ?>)</span>
+                                        </span>
+                                        <button 
+                                            type="button"
+                                            wire:click="removeFacilitator(<?php echo e($index); ?>)"
+                                            class="text-red-600 hover:text-red-800 font-bold"
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                            </div>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    </div>
+
+                    <!-- Form Buttons -->
+                    <div class="flex gap-3 pt-4 border-t">
+                        <button 
+                            type="button"
+                            wire:click="$set('showActivityForm', false)"
+                            class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition"
+                        >
+                            Cancel
+                        </button>
+                        <button 
+                            type="submit"
+                            class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition"
+                        >
+                            <?php echo e($editingActivityId ? 'Update Activity' : 'Add Activity'); ?>
+
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+    <!-- ATTENDANCE MODAL -->
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($showAttendanceModal && $selectedActivityId): ?>
+        <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <!-- Modal Header -->
+                <div class="bg-gradient-to-r from-blue-900 to-blue-800 text-white px-6 py-5 flex justify-between items-center border-b-4 border-yellow-400">
+                    <h2 class="text-2xl font-bold">Log Attendance</h2>
+                    <button 
+                        wire:click="closeAttendanceModal"
+                        class="text-white hover:text-gray-200 text-2xl font-bold transition"
+                    >
+                        ✕
+                    </button>
+                </div>
+
+                <!-- Modal Content -->
+                <div class="p-6">
+                    <!-- Bulk Actions -->
+                    <div class="flex gap-2 mb-4">
+                        <button 
+                            wire:click="toggleAllPresent"
+                            class="bg-green-100 hover:bg-green-200 text-green-800 px-4 py-2 rounded-lg font-medium text-sm"
+                        >
+                            Mark All Present
+                        </button>
+                        <button 
+                            wire:click="toggleAllAbsent"
+                            class="bg-red-100 hover:bg-red-200 text-red-800 px-4 py-2 rounded-lg font-medium text-sm"
+                        >
+                            Mark All Absent
+                        </button>
+                    </div>
+
+                    <!-- Attendance List -->
+                    <div class="space-y-2 max-h-[50vh] overflow-y-auto">
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $attendanceData; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $beneficiary_id => $record): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoop($loop->index); ?><?php endif; ?>
+                            <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                                <div class="flex-1">
+                                    <p class="font-medium text-gray-900"><?php echo e($record['name']); ?></p>
+                                </div>
+                                <select 
+                                    wire:model="attendanceData.<?php echo e($beneficiary_id); ?>.status"
+                                    class="px-3 py-1 border border-gray-300 rounded text-sm focus:ring-blue-500"
+                                >
+                                    <option value="present">Present</option>
+                                    <option value="absent">Absent</option>
+                                    <option value="late">Late</option>
+                                    <option value="excused">Excused</option>
+                                </select>
+                            </div>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="flex gap-3 mt-4 pt-4 border-t">
+                        <button 
+                            wire:click="closeAttendanceModal"
+                            class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition"
+                        >
+                            Cancel
+                        </button>
+                        <button 
+                            wire:click="saveAttendance"
+                            class="flex-1 bg-blue-900 hover:bg-blue-800 text-white font-semibold py-2 px-4 rounded-lg transition"
+                        >
+                            Save Attendance
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+</div>
+
+<!-- Success Modal -->
+<?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($showSuccessModal): ?>
+    <div class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-2xl max-w-sm w-full">
+            <!-- Modal Content -->
+            <div class="p-8 text-center">
+                <div class="flex justify-center mb-4">
+                    <svg class="w-16 h-16 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Success!</h2>
+                <p class="text-gray-600 mb-6"><?php echo e($successMessage); ?></p>
+                <button 
+                    wire:click="$set('showSuccessModal', false)"
+                    class="w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold py-3 px-4 rounded-lg transition"
+                >
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+<?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+</div>
+<?php /**PATH C:\Users\Nikko\Desktop\CAPSTONE\SmartCEMES_FINAL\resources\views/livewire/activity-tracker-inline.blade.php ENDPATH**/ ?>
