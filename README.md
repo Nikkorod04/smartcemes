@@ -24,7 +24,7 @@ A comprehensive Laravel-based system for managing community needs assessments, e
 
 ## 🚀 Quick Start
 
-### For Friends Cloning the Repository
+### Adi pagclone
 
 ```bash
 # 1. Clone the repository
