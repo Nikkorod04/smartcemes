@@ -22,7 +22,7 @@
             <!-- Left Column -->
             <div class="space-y-6">
                 <!-- Program Details -->
-                <div class="bg-white rounded-lg border border-gray-200 p-6">
+                <div class="group bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg hover:shadow-blue-100 hover:border-blue-300 transform hover:scale-105 transition-all duration-300 ease-out cursor-pointer">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
                             <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -33,7 +33,7 @@
                         <button 
                             type="button"
                             wire:click="openEditDetailsModal"
-                            class="inline-flex items-center gap-1 px-3 py-1 text-blue-600 hover:text-yellow-400 hover:bg-blue-50 rounded transition text-xs font-semibold"
+                            class="inline-flex items-center gap-1 px-3 py-1 text-blue-600 hover:text-yellow-400 hover:bg-blue-50 rounded transition text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -54,7 +54,7 @@
                 </div>
 
                 <!-- Goals & Objectives -->
-                <div class="bg-white rounded-lg border border-gray-200 p-6">
+                <div class="group bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg hover:shadow-green-100 hover:border-green-300 transform hover:scale-105 transition-all duration-300 ease-out cursor-pointer">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
                             <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -65,7 +65,7 @@
                         <button 
                             type="button"
                             wire:click="openEditTimelineModal"
-                            class="inline-flex items-center gap-1 px-3 py-1 text-blue-600 hover:text-yellow-400 hover:bg-blue-50 rounded transition text-xs font-semibold"
+                            class="inline-flex items-center gap-1 px-3 py-1 text-blue-600 hover:text-yellow-400 hover:bg-blue-50 rounded transition text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -89,7 +89,7 @@
             <!-- Right Column -->
             <div class="space-y-6">
                 <!-- Beneficiary Categories -->
-                <div class="bg-white rounded-lg border border-gray-200 p-6">
+                <div class="group bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg hover:shadow-purple-100 hover:border-purple-300 transform hover:scale-105 transition-all duration-300 ease-out cursor-pointer">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
                             <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -100,7 +100,7 @@
                         <button 
                             type="button"
                             wire:click="openEditCategoriesModal"
-                            class="inline-flex items-center gap-1 px-3 py-1 text-blue-600 hover:text-yellow-400 hover:bg-blue-50 rounded transition text-xs font-semibold"
+                            class="inline-flex items-center gap-1 px-3 py-1 text-blue-600 hover:text-yellow-400 hover:bg-blue-50 rounded transition text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -122,7 +122,7 @@
                 </div>
 
                 <!-- Communities -->
-                <div class="bg-white rounded-lg border border-gray-200 p-6">
+                <div class="group bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg hover:shadow-amber-100 hover:border-amber-300 transform hover:scale-105 transition-all duration-300 ease-out cursor-pointer">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
                             <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -133,7 +133,7 @@
                         <button 
                             type="button"
                             wire:click="openEditCommunitiesModal"
-                            class="inline-flex items-center gap-1 px-3 py-1 text-blue-600 hover:text-yellow-400 hover:bg-blue-50 rounded transition text-xs font-semibold"
+                            class="inline-flex items-center gap-1 px-3 py-1 text-blue-600 hover:text-yellow-400 hover:bg-blue-50 rounded transition text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -167,6 +167,144 @@
             >
                 Delete Program
             </button>
+        </div>
+    </div>
+
+    <!-- Program Plan Section -->
+    <div class="space-y-6 mt-8">
+        <!-- Section Header -->
+        <div class="pb-6 border-b-2 border-gray-200">
+            <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-3">
+                <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+                Program Plan
+            </h2>
+        </div>
+
+        <!-- Program Plan Details -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Left Column -->
+            <div class="space-y-6">
+                <!-- Program Objectives -->
+                <div class="group bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg hover:shadow-indigo-100 hover:border-indigo-300 transform hover:scale-105 transition-all duration-300 ease-out cursor-pointer">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                            Program Objectives
+                        </h3>
+                        <button 
+                            type="button"
+                            wire:click="openEditProgramPlanModal"
+                            class="inline-flex items-center gap-1 px-3 py-1 text-blue-600 hover:text-yellow-400 hover:bg-blue-50 rounded transition text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            Edit
+                        </button>
+                    </div>
+                    <div class="space-y-3">
+                        @if($program_objectives)
+                            <p class="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">{{ $program_objectives }}</p>
+                        @else
+                            <p class="text-gray-500 text-sm italic">No objectives set yet</p>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Program Activities -->
+                <div class="group bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg hover:shadow-cyan-100 hover:border-cyan-300 transform hover:scale-105 transition-all duration-300 ease-out cursor-pointer">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"; />
+                            </svg>
+                            Program Activities
+                        </h3>
+                        <button 
+                            type="button"
+                            wire:click="openEditProgramPlanModal"
+                            class="inline-flex items-center gap-1 px-3 py-1 text-blue-600 hover:text-yellow-400 hover:bg-blue-50 rounded transition text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            Edit
+                        </button>
+                    </div>
+                    <div class="space-y-3">
+                        @if($program_activities)
+                            <p class="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">{{ $program_activities }}</p>
+                        @else
+                            <p class="text-gray-500 text-sm italic">No activities set yet</p>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="space-y-6">
+                <!-- Expected Outcomes -->
+                <div class="group bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg hover:shadow-green-100 hover:border-green-300 transform hover:scale-105 transition-all duration-300 ease-out cursor-pointer">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Expected Outcomes
+                        </h3>
+                        <button 
+                            type="button"
+                            wire:click="openEditProgramPlanModal"
+                            class="inline-flex items-center gap-1 px-3 py-1 text-blue-600 hover:text-yellow-400 hover:bg-blue-50 rounded transition text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            Edit
+                        </button>
+                    </div>
+                    <div class="space-y-3">
+                        @if($expected_outcomes)
+                            <p class="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">{{ $expected_outcomes }}</p>
+                        @else
+                            <p class="text-gray-500 text-sm italic">No outcomes set yet</p>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Evaluation Methods -->
+                <div class="group bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg hover:shadow-rose-100 hover:border-rose-300 transform hover:scale-105 transition-all duration-300 ease-out cursor-pointer">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            Evaluation Methods
+                        </h3>
+                        <button 
+                            type="button"
+                            wire:click="openEditProgramPlanModal"
+                            class="inline-flex items-center gap-1 px-3 py-1 text-blue-600 hover:text-yellow-400 hover:bg-blue-50 rounded transition text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            Edit
+                        </button>
+                    </div>
+                    <div class="space-y-3">
+                        @if($evaluation_methods)
+                            <p class="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">{{ $evaluation_methods }}</p>
+                        @else
+                            <p class="text-gray-500 text-sm italic">No evaluation methods set yet</p>
+                        @endif
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -422,6 +560,82 @@
                 >
                     OK
                 </button>
+            </div>
+        </div>
+    @endif
+
+    <!-- Edit Program Plan Modal -->
+    @if ($showEditProgramPlanModal)
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-96 overflow-y-auto">
+                <div class="bg-gradient-to-r from-blue-900 to-blue-800 text-white px-6 py-4 flex justify-between items-center sticky top-0">
+                    <h2 class="text-lg font-bold">Edit Program Plan</h2>
+                    <button 
+                        wire:click="$set('showEditProgramPlanModal', false)"
+                        class="text-white hover:text-gray-200"
+                    >
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+                <form wire:submit.prevent="updateProgramPlan" class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Program Objectives</label>
+                        <textarea 
+                            wire:model="program_objectives" 
+                            placeholder="Enter program objectives"
+                            rows="4"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        ></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Program Activities</label>
+                        <textarea 
+                            wire:model="program_activities" 
+                            placeholder="Enter program activities"
+                            rows="4"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        ></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Expected Outcomes</label>
+                        <textarea 
+                            wire:model="expected_outcomes" 
+                            placeholder="Enter expected outcomes"
+                            rows="4"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        ></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Evaluation Methods</label>
+                        <textarea 
+                            wire:model="evaluation_methods" 
+                            placeholder="Enter evaluation methods"
+                            rows="4"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        ></textarea>
+                    </div>
+
+                    <div class="flex gap-3 pt-4 border-t">
+                        <button 
+                            type="button"
+                            wire:click="$set('showEditProgramPlanModal', false)"
+                            class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition"
+                        >
+                            Cancel
+                        </button>
+                        <button 
+                            type="submit"
+                            class="flex-1 bg-blue-900 hover:bg-blue-900 text-white hover:text-yellow-400 font-semibold py-2 px-4 rounded-lg transition"
+                        >
+                            Save
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     @endif

@@ -33,10 +33,17 @@ class ManageExtensionProgramsDetail extends Component
     public $showEditTimelineModal = false;
     public $showEditCategoriesModal = false;
     public $showEditCommunitiesModal = false;
+    public $showEditProgramPlanModal = false;
 
     // Timeline fields
     public $planned_start_date;
     public $planned_end_date;
+
+    // Program Plan fields
+    public $program_objectives = '';
+    public $program_activities = '';
+    public $expected_outcomes = '';
+    public $evaluation_methods = '';
 
     // Beneficiary category options
     public array $beneficiary_category_options = [
@@ -67,6 +74,10 @@ class ManageExtensionProgramsDetail extends Component
             $this->selected_beneficiary_categories = is_array($program->beneficiary_categories)
                 ? $program->beneficiary_categories
                 : json_decode($program->beneficiary_categories, true) ?? [];
+            $this->program_objectives = $program->program_objectives ?? '';
+            $this->program_activities = $program->program_activities ?? '';
+            $this->expected_outcomes = $program->expected_outcomes ?? '';
+            $this->evaluation_methods = $program->evaluation_methods ?? '';
             $this->editingId = $program_id;
         }
 
@@ -112,6 +123,11 @@ class ManageExtensionProgramsDetail extends Component
         $this->showEditCommunitiesModal = true;
     }
 
+    public function openEditProgramPlanModal()
+    {
+        $this->showEditProgramPlanModal = true;
+    }
+
     public function updateProgram()
     {
         $this->validate();
@@ -135,12 +151,37 @@ class ManageExtensionProgramsDetail extends Component
                 $this->showEditCategoriesModal = false;
                 $this->showEditCommunitiesModal = false;
                 $this->showEditTimelineModal = false;
+                $this->showEditProgramPlanModal = false;
 
                 $this->notification = 'Program updated successfully!';
                 $this->showSuccessModal = true;
             }
         } catch (\Exception $e) {
             $this->notification = 'Error updating program: ' . $e->getMessage();
+        }
+    }
+
+    public function updateProgramPlan()
+    {
+        try {
+            $program = ExtensionProgram::find($this->editingId);
+            
+            if ($program) {
+                $program->update([
+                    'program_objectives' => $this->program_objectives,
+                    'program_activities' => $this->program_activities,
+                    'expected_outcomes' => $this->expected_outcomes,
+                    'evaluation_methods' => $this->evaluation_methods,
+                ]);
+
+                // Close modal
+                $this->showEditProgramPlanModal = false;
+
+                $this->notification = 'Program Plan updated successfully!';
+                $this->showSuccessModal = true;
+            }
+        } catch (\Exception $e) {
+            $this->notification = 'Error updating program plan: ' . $e->getMessage();
         }
     }
 
